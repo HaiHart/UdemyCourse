@@ -10,7 +10,7 @@ let accounts
 
 beforeEach(async () => {
 	accounts = await web3.eth.getAccounts()
-	lottery = await new web3.Contract(JSON.parse(interface))
+	lottery = await new web3.eth.Contract(JSON.parse(interface))
 		.deploy({ data: bytecode })
 		.send({ from: accounts[0], gas: '1000000' })
 })
@@ -18,5 +18,48 @@ beforeEach(async () => {
 describe('lottery contract', () => {
 	it('Contract deploy', () => {
 		assert.ok(lottery.options.address)
+	})
+	it('allows 1 enter', async () => {
+		await lottery.methods.enter().send({
+			from: accounts[0],
+			value:web3.utils.toWei('0.02','ether')
+		})
+		const players = await lottery.methods.getPlayers().call({
+			from:accounts[0]
+		})
+		assert.equal(accounts[0], players[0])
+		assert.equal(1,players.length)
+	})
+	it('allow multiplayer', async () => {
+		await lottery.methods.enter().send({
+			from: accounts[0],
+			value: web3.utils.toWei('0.02', 'ether')
+		})
+		await lottery.methods.enter().send({
+			from: accounts[1],
+			value: web3.utils.toWei('0.02', 'ether')
+		})
+		await lottery.methods.enter().send({
+			from: accounts[2],
+			value: web3.utils.toWei('0.02', 'ether')
+		})
+		const players = await lottery.methods.getPlayers().call({
+			from: accounts[0]
+		})
+		assert.equal(accounts[0], players[0])
+		assert.equal(accounts[1], players[1])
+		assert.equal(accounts[2], players[2])
+		assert.equal(3, players.length)
+	})
+	it('Require min eth', async () => {
+		try {
+			await lottery.methods.enter().send({
+				from: accounts[0],
+				value: 200
+			})
+			assert(false)
+		} catch (err) {
+			assert.ok(err)
+		}
 	})
 })
