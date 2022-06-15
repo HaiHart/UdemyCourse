@@ -22,13 +22,13 @@ describe('lottery contract', () => {
 	it('allows 1 enter', async () => {
 		await lottery.methods.enter().send({
 			from: accounts[0],
-			value:web3.utils.toWei('0.02','ether')
+			value: web3.utils.toWei('0.02', 'ether')
 		})
 		const players = await lottery.methods.getPlayers().call({
-			from:accounts[0]
+			from: accounts[0]
 		})
 		assert.equal(accounts[0], players[0])
-		assert.equal(1,players.length)
+		assert.equal(1, players.length)
 	})
 	it('allow multiplayer', async () => {
 		await lottery.methods.enter().send({
@@ -61,5 +61,52 @@ describe('lottery contract', () => {
 		} catch (err) {
 			assert.ok(err)
 		}
+	})
+	it('Not manager', async () => {
+		try {
+			await lottery.methods.pickWinner().send({
+				from: accounts[1],
+			})
+			assert(false)
+		} catch (err) {
+			assert(err)
+		}
+	})
+	it('end to end process', async () => {
+		await lottery.methods.enter().send({
+			from: accounts[0],
+			value:web3.utils.toWei('2','ether')
+		})
+		const initialBalance = await web3.eth.getBalance(accounts[0])
+		await lottery.methods.pickWinner().send({
+			from:accounts[0]		
+		})
+		const finalBalance = await web3.eth.getBalance(accounts[0])
+		const diff = finalBalance - initialBalance
+		assert(diff> web3.utils.toWei('1.8','ether'))
+	})
+	it('empty player', async () => {
+		await lottery.methods.enter().send({
+			from: accounts[0],
+			value: web3.utils.toWei('2', 'ether')
+		})
+		
+		await lottery.methods.pickWinner().send({
+			from: accounts[0]
+		})
+		const players= await lottery.methods.getPlayers().call()
+		assert.equal(0,players)
+	})
+	it('empty balance', async () => {
+		await lottery.methods.enter().send({
+			from: accounts[0],
+			value: web3.utils.toWei('2', 'ether')
+		})
+
+		await lottery.methods.pickWinner().send({
+			from: accounts[0]
+		})
+		const balance = await web3.eth.getBalance(lottery.options.address)
+		assert.equal(0, balance)
 	})
 })
