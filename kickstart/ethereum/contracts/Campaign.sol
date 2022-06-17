@@ -1,6 +1,18 @@
 pragma solidity ^0.4.17;
 
+contract Factory{
+    address[] public deployedCampaign;
 
+    function createCampaign(uint mini)public{
+        address newCampaign = new Campaign(mini,msg.sender); 
+        deployedCampaign.push(newCampaign);
+    }
+
+    function getDeployed()public view returns(address[]){
+        return deployedCampaign;
+    }
+
+}
 
 contract Campaign{
     address public manager;
@@ -66,16 +78,3 @@ contract Campaign{
 
 }
 
-contract Factory{
-    address[] public deployedCampaign;
-
-    function createCampaign(uint mini)public{
-        address newCampaign = new Campaign(mini,msg.sender); 
-        deployedCampaign.push(newCampaign);
-    }
-
-    function getDeployed()public view returns(address[]){
-        return deployedCampaign;
-    }
-
-}
