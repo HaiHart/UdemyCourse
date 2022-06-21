@@ -1,5 +1,24 @@
 {
   "dependencies": {
     "solc": "^0.4.17"
-  }
+  },
+  "name": "interncl",
+  "description": "��#\u0000 \u0000U\u0000d\u0000e\u0000m\u0000y\u0000C\u0000o\u0000u\u0000r\u0000s\u0000e\u0000\r\u0000 \u0000'\u0000'\u0000'\u0000\r\u0000 \u0000N\u0000o\u0000t\u0000 \u0000s\u0000o\u0000 \u0000g\u0000o\u0000o\u0000d\u0000 \u0000r\u0000n\u0000\r\u0000 \u0000'\u0000'\u0000'\u0000",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaiHart/UdemyCourse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HaiHart/UdemyCourse/issues"
+  },
+  "homepage": "https://github.com/HaiHart/UdemyCourse#readme"
 }
