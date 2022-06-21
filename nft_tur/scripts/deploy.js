@@ -1,15 +1,15 @@
 const { ethers } = require('hardhat')
 
 async function main() {
-  const SuperMarioWorld = await ethers.getContractFactory("SuperMarioWorld")
+  const SuperMarioWorld = await ethers.getContractFactory("SuperLuigiWorldOZ")
   
-  const superMarioWorld = await SuperMarioWorld.deploy("SuperLuigiWorld", "SPRL")
+  const superMarioWorld = await SuperMarioWorld.deploy("SuperLuigiWorldOZ", "SPRMO")
   
   await superMarioWorld.deployed()
   
   console.log("success! contract was deployed to ", superMarioWorld.address)
   
-  await superMarioWorld.mint("https://ipfs.of/ipfs/QmZMK3QkG2tLiR9BkPBXrWrHQrjJGdUMWDT91zNA5Jx8QF")
+  await superMarioWorld.mint("https://ipfs.io/ipfs/QmNhZgsYAFsPxdEKXnvEJaurWswjjKNeBNiUM2hWevUyr8")
   console.log('ntf successfully minted')
 }
 
