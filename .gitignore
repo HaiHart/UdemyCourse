@@ -1,2 +1,4 @@
 *.json
+.mod
+.sum
 node_modules/

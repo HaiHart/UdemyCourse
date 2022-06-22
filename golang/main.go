@@ -1,163 +1,120 @@
-// package main
-
-// import (
-// 	"fmt"
-// 	"time"
-// )
-
-// func f(from string){
-// 	for i:=0;i<3;i++{
-// 		fmt.Println(from,":",i)
-// 	}
-// }
-
-// func main(){
-// 	f("direct")
-
-// 	go func (msg string){
-// 		fmt.Println(msg)
-// 	}("going")
-// 	go f("goroutine")
-
-// 	go func (msg string){
-// 		fmt.Println(msg,":",msg)
-// 	}("Going")
-
-// 	time.Sleep(time.Second)
-// 	fmt.Println("done")
-// }
-
-// package main
-
-// import "fmt"
-
-// func main(){
-// 	messages:=make(chan string)
-
-// 	go func(){messages<-"ping"}()
-
-// 	go func(){messages<-"ping2"}()
-// 	go func(){messages<-"ping3"}()
-// 	go func(){messages<-"ping4"}()
-// 	go func(){messages<-"ping5"}()
-
-// 	for i:=0;i<5;i++{
-// 		msg:=<-messages
-
-// 		fmt.Println(msg)
-// 	}
-// }
-
-// package main
-
-// import (
-// 	"fmt"
-// 	"time"
-// )
-
-// func main(){
-// 	c1:=make(chan string,1)
-// 	go func ()  {
-// 		time.Sleep(2*time.Second)
-// 		c1<- "result 1"
-// 	}()
-
-// 	select {
-// 	case res:=<-c1:
-// 		fmt.Println(res)
-// 	case <-time.After(1*time.Second):
-// 		fmt.Println("timeout 1")
-// 	}
-
-// 	c2:=make(chan string,1)
-
-// 	go func() {
-// 		time.Sleep(2*time.Second)
-// 		c2<-"result 2"
-// 	}()
-
-// 	select {
-// 	case res:=<-c2:
-// 		fmt.Println(res)
-// 	case <-time.After(3*time.Second):
-// 		fmt.Println("timeout 2")
-// 	}
-// }
-// package main
-
-// import (
-// 	"fmt"
-// )
-
-// func main(){
-// 	messages:=make(chan string)
-// 	signals:=make(chan string)
-
-// 	select {
-// 	case msg:=<-messages:
-// 		fmt.Println("messages received",msg)
-// 	default:
-// 		fmt.Println("no messages received")
-
-// 	}
-
-// 	msg:="hi"
-
-// 	select {
-// 	case messages<-msg:
-// 		fmt.Println("sent messages ",msg)
-// 	default:
-// 		fmt.Println("no messages sent")
-// 	}
-
-// 	select {
-// 	case msg:=<-messages:
-// 		fmt.Println("received messages ",msg)
-// 	case sig:=<-signals:
-// 		fmt.Println("Received signal",sig)
-// 	default:
-// 		fmt.Println("no activity")
-// 	}
-// }
-
-// package main
-
-// import "fmt"
-
-// func main(){
-// 	    queue := make(chan string, 2)
-//     queue <- "one"
-//     queue <- "two"
-//     close(queue)
-
-//     for elem := range queue {
-//         fmt.Println(elem)
-//     }
-// }
-
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
+	"io/ioutil"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func main(){
-    ticker:=time.NewTicker(500*time.Millisecond)
-    done:=make(chan bool)
+type Article struct{
+	Id string `json:"Id"`
+	Title string `json:"Title"`
+	Desc string `json:"desc"`
+	Content string `json:"content"`
+}
 
-    go func() {
-        for{
-            select {
-            case <-done:  
-                return  
-            case t:=<-ticker.C:
-                fmt.Println("Tick at: ",t)
-            }
+var Articles []Article
+
+func homePage(w http.ResponseWriter, r *http.Request)  {
+	fmt.Fprint(w,"Welcome to the Homepage!")
+	fmt.Println("Endpoint Hit: homePage")
+}
+
+func returnAllArticles(w http.ResponseWriter,r *http.Request){
+	fmt.Println("Endpoint hit: returnAllArticles")
+	json.NewEncoder(w).Encode(Articles)
+}
+
+func returnSingleArticle(w http.ResponseWriter,r *http.Request){
+	vars:=mux.Vars(r)
+	keys:=vars["id"]
+	fmt.Println("hit endpoint: SingleArticle")
+	fmt.Fprint(w,"Key:"+keys)
+	for _,article:=range Articles{
+		if(article.Id==keys){
+			json.NewEncoder(w).Encode(article)
+		}
+	}
+}
+
+func createNewArticle(w http.ResponseWriter,r *http.Request){
+	reqBody,_:=ioutil.ReadAll(r.Body)
+	var article Article
+	json.Unmarshal(reqBody,&article)
+	fmt.Printf("%+v",article)
+	Articles = append(Articles, article)
+
+	json.NewEncoder(w).Encode(reqBody)
+}
+
+func deleteArticle(w http.ResponseWriter,r *http.Request){
+	 vars := mux.Vars(r)
+    // we will need to extract the `id` of the article we
+    // wish to delete
+    id := vars["id"]
+
+    // we then need to loop through all our articles
+    for index, article := range Articles {
+        // if our id path parameter matches one of our
+        // articles
+        if article.Id == id {
+            // updates our Articles array to remove the 
+            // article
+            Articles = append(Articles[:index], Articles[index+1:]...)
         }
-    }()
-    time.Sleep(1600*time.Millisecond)
-    ticker.Stop()
-    done<-true
-    fmt.Println("Ticker stopped")
+    }
+}
+
+func updateArticle(w http.ResponseWriter,r *http.Request){
+	vars:=mux.Vars(r)
+	id:=vars["id"]
+	var reqBody,_=ioutil.ReadAll(r.Body)
+	var article Article
+	json.Unmarshal(reqBody,&article)
+	for index, article := range Articles{
+		if(article.Id==id){
+			tmp:=append(Articles[:index],article)
+			Articles=append(tmp,Articles[index+1:]... )
+		}
+	}
+}
+
+func handleRequests(){
+	// http.HandleFunc("/",homePage)
+	// http.HandleFunc("/articles/{id}",returnAllArticles)
+	// log.Fatal(http.ListenAndServe(":10000",nil))
+
+	myRouter:=mux.NewRouter().StrictSlash(true)
+
+	myRouter.HandleFunc("/",homePage)
+	myRouter.HandleFunc("/articles/",returnAllArticles)
+	myRouter.HandleFunc("/article",createNewArticle).Methods("POST")
+	myRouter.HandleFunc("/articles/{id}",returnSingleArticle)
+	myRouter.HandleFunc("/article/{id}",deleteArticle).Methods("DELETE")
+	myRouter.HandleFunc("/article/{id}",updateArticle).Methods("PUT")
+	log.Fatal(http.ListenAndServe(":10000",myRouter))
+}
+
+func main (){
+
+	Articles=[]Article{
+		Article{
+			Id: "1",
+			Title: "Hello",
+			Desc: "Insert default",
+			Content: "Insert Default",
+		},
+		Article{
+			Id: "2",
+			Title: "Hello_2",
+			Desc: "Insert default",
+			Content: "Insert Default",
+		},
+	}
+
+	handleRequests()
 }
