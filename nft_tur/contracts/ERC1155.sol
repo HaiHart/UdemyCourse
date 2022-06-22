@@ -1,5 +1,7 @@
 pragma solidity ^0.8.2;
 
+import "@"
+
 contract ERC1155 {
 
 	mapping(uint256=>mapping(address=>uint256)) internal _balances;
