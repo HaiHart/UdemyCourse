@@ -19,3 +19,5 @@ insert into Articles Values(9,"the house_9","Some blode wrote this","haha");
 insert into Articles Values(10,"the house_10","Some blode wrote this","haha");
 insert into Articles Values(11,"the house_11","Some blode wrote this","haha");
 insert into Articles Values(12,"the house_12","Some blode wrote this","haha");
+
+select * from Articles where Id=5;

@@ -62,7 +62,7 @@ func returnSingleArticle(w http.ResponseWriter,r *http.Request){
 	var article  Article
 	if err!=nil{panic(err.Error())}
 	for results.Next(){
-	err=results.Scan(&article.Id,&article.Title,&article.Descript,&article.Content)
+		err=results.Scan(&article.Id,&article.Title,&article.Descript,&article.Content)
 }
 	if err!= nil{panic(err.Error())}
 	json.NewEncoder(w).Encode(article)
@@ -92,7 +92,13 @@ func deleteArticle(w http.ResponseWriter,r *http.Request){
     // we will need to extract the `id` of the article we
     // wish to delete
     id := vars["id"]
-
+	var delStatement=fmt.Sprintf("delete from Articles where Id= %s ",id)
+	fmt.Println(delStatement)
+	var del,err=db.Query(delStatement)
+	defer del.Close()
+	if err!=nil{
+		panic(err.Error())
+	}
     // we then need to loop through all our articles
     for index, article := range Articles {
         // if our id path parameter matches one of our
