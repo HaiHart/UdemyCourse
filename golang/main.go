@@ -1,19 +1,30 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	//"os"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	// "github.com/joho/godotenv"
 )
+
+
+
+var connectionString=("root:donQuiote2@tcp(127.0.0.1:3306)/test_api")
+
+var db, err = sql.Open("mysql", connectionString)
 
 type Article struct{
 	Id string `json:"Id"`
 	Title string `json:"Title"`
-	Desc string `json:"desc"`
+	Descript string `json:"desc"`
 	Content string `json:"content"`
 }
 
@@ -25,6 +36,18 @@ func homePage(w http.ResponseWriter, r *http.Request)  {
 }
 
 func returnAllArticles(w http.ResponseWriter,r *http.Request){
+	results,err:=db.Query("Select * from Articles")
+	if err!=nil{
+		panic(err.Error())
+	}
+	for results.Next(){
+		var article Article
+		err=results.Scan(&article.Id,&article.Title,&article.Descript,&article.Content)
+		if err!=nil{
+			panic(err.Error())
+		}
+		Articles = append(Articles, article)
+	}
 	fmt.Println("Endpoint hit: returnAllArticles")
 	json.NewEncoder(w).Encode(Articles)
 }
@@ -33,19 +56,32 @@ func returnSingleArticle(w http.ResponseWriter,r *http.Request){
 	vars:=mux.Vars(r)
 	keys:=vars["id"]
 	fmt.Println("hit endpoint: SingleArticle")
-	fmt.Fprint(w,"Key:"+keys)
-	for _,article:=range Articles{
-		if(article.Id==keys){
-			json.NewEncoder(w).Encode(article)
-		}
-	}
+	fmt.Println("Key:"+keys)
+	fmt.Println(fmt.Sprintf( "Select * from Articles where Id= %s",&keys))
+	results,err:=db.Query(fmt.Sprintf( "Select * from Articles where Id= %s",keys))
+	var article  Article
+	if err!=nil{panic(err.Error())}
+	for results.Next(){
+		err=results.Scan(&article.Id,&article.Title,&article.Descript,&article.Content)
+}
+	if err!= nil{panic(err.Error())}
+	json.NewEncoder(w).Encode(article)
 }
 
 func createNewArticle(w http.ResponseWriter,r *http.Request){
 	reqBody,_:=ioutil.ReadAll(r.Body)
+	
 	var article Article
 	json.Unmarshal(reqBody,&article)
-	fmt.Printf("%+v",article)
+	fmt.Println(fmt.Sprintf("insert into Articles values(%s,%s,%s,%s,%s)",article.Id,article.Title,article.Descript,article.Content))
+
+	var insert,err=db.Query(fmt.Sprintf("insert into Articles values(%s,%s,%s,%s,%s)",article.Id,article.Title,article.Descript,article.Content))
+	defer insert.Close()
+	if err!=nil{
+		panic(err.Error())
+	}
+
+	
 	Articles = append(Articles, article)
 
 	json.NewEncoder(w).Encode(reqBody)
@@ -56,7 +92,13 @@ func deleteArticle(w http.ResponseWriter,r *http.Request){
     // we will need to extract the `id` of the article we
     // wish to delete
     id := vars["id"]
-
+	var delStatement=fmt.Sprintf("delete from Articles where Id= %s ",id)
+	fmt.Println(delStatement)
+	var del,err=db.Query(delStatement)
+	defer del.Close()
+	if err!=nil{
+		panic(err.Error())
+	}
     // we then need to loop through all our articles
     for index, article := range Articles {
         // if our id path parameter matches one of our
@@ -99,22 +141,16 @@ func handleRequests(){
 	log.Fatal(http.ListenAndServe(":10000",myRouter))
 }
 
-func main (){
 
-	Articles=[]Article{
-		Article{
-			Id: "1",
-			Title: "Hello",
-			Desc: "Insert default",
-			Content: "Insert Default",
-		},
-		Article{
-			Id: "2",
-			Title: "Hello_2",
-			Desc: "Insert default",
-			Content: "Insert Default",
-		},
+func main (){
+	fmt.Println(connectionString)
+
+	if err!=nil{
+		panic(err.Error())
 	}
+	defer db.Close()
+
+	
 
 	handleRequests()
 }
