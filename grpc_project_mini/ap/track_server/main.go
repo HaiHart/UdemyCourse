@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	. "F:\InternCl\grpc_project_mini\ap\api"
+	. "github.com/HaiHart/UdemyCourse/tree/main/grpc_project_mini/ap/api"
 	"github.com/gorilla/mux"
 )
 
