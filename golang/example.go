@@ -541,4 +541,10 @@
 //             "C#",
 //         })
 // }
+var y sync.WaitGroup
 
+y.Add(2)
+
+y.Done()
+
+y.Wait()

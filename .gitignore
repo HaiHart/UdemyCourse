@@ -2,3 +2,5 @@
 .mod
 .sum
 node_modules/
+gRPC_tut/
+golang go presentation/
