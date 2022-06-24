@@ -1,0 +1,39 @@
+syntax="proto3";
+
+option go_package='./';
+
+package ap.tracker;
+
+import "google/protobuf/timestamp.proto";
+
+service Activity_log{
+	rpc Insert (Activity) returns (InsertRespone);
+	rpc Retrieve (RetrieveRequest) returns (Activity);
+	rpc List (ListRequest) returns (Activities);
+}
+
+message Activity{
+	int32 id=1;
+	google.protobuf.Timestamp time=2;
+	string description = 3;
+}
+
+message InsertRespone{
+	int32 id=1;
+}
+
+message RetrieveRequest{
+	int32 id=1;
+}
+
+message ListRequest{
+	int32 offset=1;
+}
+
+message Activities{
+	repeated Activity activities=1;
+}
+
+message ActivityQuery{
+	int32 offset=1;
+}
