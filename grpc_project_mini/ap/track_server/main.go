@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	. "github.com/HaiHart/UdemyCourse/tree/main/grpc_project_mini/ap/api"
+	. "github.com/HaiHart/UdemyCourse/blob/main/grpc_project_mini/ap/api/main.go"
 	"github.com/gorilla/mux"
 )
 

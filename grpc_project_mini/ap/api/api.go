@@ -3,7 +3,7 @@ package api
 import "time"
 
 type Activity struct {
-	time time.Time	`json:"time"`
+	Time time.Time	`json:"time"`
 	Description string	`json:"Description"`
 	Id uint64	`json:"id"`
 }
@@ -17,7 +17,7 @@ type IDDocument struct{
 }
 
 type ActivityDocument struct{
-	activity Activity `json:"Activity"`
+	Activity Activity `json:"Activity"`
 }
 
 
