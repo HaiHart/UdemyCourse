@@ -1,9 +1,8 @@
-module test_project
+module github.com/HaiHart/UdemyCourse/tree/main/grpc_project_mini
 
 go 1.18
 
 require (
-	github.com/gorilla/mux v1.8.0
 	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.0
 )
